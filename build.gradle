@@ -1,0 +1,132 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+    }
+}
+
+
+repositories {
+    maven {
+        name 'CB Maven FS'
+        url "http://chickenbones.net/maven/"
+    }
+    maven {
+         name "ProfMobius Maven FS"
+         url "http://mobiusstrip.eu/maven"
+    }
+    maven {
+        name 'DVS1 Maven FS'
+        url 'http://dvs1.progwml6.com/files/maven'
+    }
+    maven {
+        name 'ForgeFS'
+        url 'http://files.minecraftforge.net/maven'
+    }
+}
+
+
+apply plugin: 'forge'
+group = 'mods.natura'
+
+// define the properties file
+ext.configFile = file "build.properties"
+
+configFile.withReader {
+    // read config.  it shall from now on be referenced as simply config or as project.config
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
+dependencies {
+    compile "mantle:Mantle:${config.minecraft_version}-${config.mantle_version}:deobf"
+    //compile "tconstruct:TConstruct:${config.minecraft_version}-${config.tconstruct_version}:deobf"
+    //compile "codechicken:CodeChickenLib:${config.minecraft_version}-${config.CCLIB_version}:dev"
+    //compile "codechicken:ForgeMultipart:${config.minecraft_version}-${config.FMP_version}:dev"
+    //compile "codechicken:CodeChickenCore:${config.minecraft_version}-${config.ccc_version}:dev"
+    //compile "codechicken:NotEnoughItems:${config.minecraft_version}-${config.NEI_version}:dev"
+}
+
+minecraft {
+    version = config.minecraft_version + "-" + config.forge_version
+    mappings = config.mappings
+    runDir = 'eclipse'
+}
+
+// sets version to the slimeKnights version format
+task buildInfo {
+    def cmd = "git rev-parse --short HEAD"
+    def proc = cmd.execute()
+    proc.waitFor()
+    if (proc.exitValue() == 0) {
+        ext.revision = proc.text.trim()
+    } else {
+        ext.revision = "GITBORK"
+    }
+
+    if (System.getenv().BUILD_NUMBER != null) {
+        ext.buildNum = System.getenv().BUILD_NUMBER
+    } else {
+        ext.buildNum = "DEV"
+    }
+}
+version = "${minecraft.version}-${project.buildInfo.buildNum}.${project.buildInfo.revision}"
+
+processResources
+{
+        // replace stuff in text files, not binary ones.
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.info'
+		
+                // replace version and MCVersion
+      expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+        // copy everything else, thats not text
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.info'
+    }
+}
+
+// because the normal output has been made to be obfuscated
+task devjar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+task sourcesjar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+artifacts {
+    archives devjar
+    archives sourcesjar
+}
+
+task("uploadJars", dependsOn:"reobf") {
+    
+    description = "uploads JARs"
+
+    if (project.hasProperty("local_maven")) {
+	    apply plugin: 'maven'
+            uploadArchives {
+                repositories {
+                    mavenDeployer {
+                        repository(url: "file://${local_maven}")
+                }
+            }
+        }
+    }
+}

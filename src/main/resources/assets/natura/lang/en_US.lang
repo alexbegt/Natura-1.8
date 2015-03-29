@@ -1,0 +1,14 @@
+itemGroup.natura.plants=Natura Plants
+itemGroup.natura.trees=Natura Trees
+itemGroup.natura.nether=Natura Nether
+
+tile.cloud.cloud_white.name=Cloud
+tile.cloud.cloud_gray.name=Dark Cloud
+tile.cloud.cloud_dark.name=Ash Cloud
+tile.cloud.cloud_sulfur.name=Sulfur Cloud
+
+tooltip.cloud1=So light and fluffy!
+tooltip.cloud2=Saves you when you fall
+tooltip.cloud3=Causes lightning strikes
+tooltip.cloud4=3x3 Converts into charcoal
+tooltip.cloud5=2x2 Converts into sulfur

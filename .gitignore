@@ -1,0 +1,27 @@
+# Compiled Java
+*.class
+
+# Eclipse
+.classpath
+.project
+.settings
+eclipse
+run
+bin
+
+#IDEA files from Gradle
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Gradle
+/.gradle/
+/build/
+/bin/
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
